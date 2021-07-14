@@ -164,7 +164,7 @@ class NumericallyAugmentedBertNet(nn.Module):
         sequence_output_list = [ item for item in outputs[2][-4:] ]
 
         batch_size = input_ids.size(0)
-        if ("passage_span_extraction" in self.answering_abilities or "question_span" in self.answering_abilities) and self.use_gcn:
+        if ("passage_span_extraction" in self.answering_abilities or "question_span_extraction" in self.answering_abilities) and self.use_gcn:
             # M2, M3
             sequence_alg = self._gcn_input_proj(torch.cat([sequence_output_list[2], sequence_output_list[3]], dim=2))
             encoded_passage_for_numbers = sequence_alg
