@@ -6,7 +6,6 @@ from typing import Tuple, Dict
 
 from allennlp.modules.conditional_random_field import ConditionalRandomField, allowed_transitions
 from tools.allennlp import replace_masked_values, logsumexp
-# from allennlp.nn.util import replace_masked_values, logsumexp
 from .beam_search import BeamSearch
 
 

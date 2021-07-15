@@ -3,6 +3,7 @@ import pickle
 import torch
 import random
 from .token import Token
+import inspect
 
 
 class DropBatchGen(object):
@@ -19,10 +20,11 @@ class DropBatchGen(object):
             data = pickle.load(f)
 
         all_data = []
+        print(inspect.getsource(Token))
         for item in data:
             question_tokens = tokenizer.convert_tokens_to_ids(item["question_tokens"])
             passage_tokens = tokenizer.convert_tokens_to_ids(item["passage_tokens"])
-            question_passage_tokens = [ Token(text=item[0], idx=item[1][0], edx=item[1][1] ) for item in zip(item["question_passage_tokens"],
+            question_passage_tokens = [ Token(text=item[0], edx=item[1][1], idx=item[1][0] ) for item in zip(item["question_passage_tokens"],
                     [(0,0)] + item["question_token_offsets"] + [(0,0)]+ item["passage_token_offsets"] + [(0, 0)])]
             item["question_passage_tokens"] = question_passage_tokens
             all_data.append((question_tokens, passage_tokens, item))
