@@ -4,7 +4,7 @@ from .optimizer import BertAdam as Adam
 from .utils import AverageMeter
 
 
-class DropBertModel():
+class DropBertModel:
     def __init__(self, args, network, state_dict=None, num_train_step=-1):
         self.args = args
         self.train_loss = AverageMeter()
@@ -14,24 +14,51 @@ class DropBertModel():
         if state_dict is not None:
             print("Load Model!")
             self.network.load_state_dict(state_dict["state"])
-        self.mnetwork = nn.DataParallel(self.network) if args.gpu_num > 1 else self.network
+        self.mnetwork = (
+            nn.DataParallel(self.network) if args.gpu_num > 1 else self.network
+        )
 
-        self.total_param = sum([p.nelement() for p in self.network.parameters() if p.requires_grad])
-        no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
+        self.total_param = sum(
+            [p.nelement() for p in self.network.parameters() if p.requires_grad]
+        )
+        no_decay = ["bias", "LayerNorm.bias", "LayerNorm.weight"]
         optimizer_parameters = [
-            {'params': [p for n, p in self.network.bert.named_parameters() if not any(nd in n for nd in no_decay)],
-             'weight_decay': args.bert_weight_decay, 'lr': args.bert_learning_rate},
-            {'params': [p for n, p in self.network.bert.named_parameters() if any(nd in n for nd in no_decay)],
-             'weight_decay': 0.0, 'lr': args.bert_learning_rate},
-            {'params': [p for n, p in self.network.named_parameters() if not n.startswith("bert.")],
-             "weight_decay": args.weight_decay, "lr": args.learning_rate}
+            {
+                "params": [
+                    p
+                    for n, p in self.network.bert.named_parameters()
+                    if not any(nd in n for nd in no_decay)
+                ],
+                "weight_decay": args.bert_weight_decay,
+                "lr": args.bert_learning_rate,
+            },
+            {
+                "params": [
+                    p
+                    for n, p in self.network.bert.named_parameters()
+                    if any(nd in n for nd in no_decay)
+                ],
+                "weight_decay": 0.0,
+                "lr": args.bert_learning_rate,
+            },
+            {
+                "params": [
+                    p
+                    for n, p in self.network.named_parameters()
+                    if not n.startswith("bert.")
+                ],
+                "weight_decay": args.weight_decay,
+                "lr": args.learning_rate,
+            },
         ]
-        self.optimizer = Adam(optimizer_parameters,
-                              lr=args.learning_rate,
-                              warmup=args.warmup,
-                              t_total=num_train_step,
-                              max_grad_norm=args.grad_clipping,
-                              schedule=args.warmup_schedule)
+        self.optimizer = Adam(
+            optimizer_parameters,
+            lr=args.learning_rate,
+            warmup=args.warmup,
+            t_total=num_train_step,
+            max_grad_norm=args.grad_clipping,
+            schedule=args.warmup_schedule,
+        )
         if self.args.gpu_num > 0:
             self.network.cuda()
         self.em_avg = AverageMeter()
@@ -77,14 +104,16 @@ class DropBertModel():
         return total_num, loss_sum / total_batch, metrics["em"], metrics["f1"]
 
     def save(self, prefix, epoch):
-        network_state = dict([(k, v.cpu()) for k, v in self.network.state_dict().items()])
+        network_state = dict(
+            [(k, v.cpu()) for k, v in self.network.state_dict().items()]
+        )
         other_params = {
-            'optimizer': self.optimizer.state_dict(),
-            'config': self.args,
-            'epoch': epoch
+            "optimizer": self.optimizer.state_dict(),
+            "config": self.args,
+            "epoch": epoch,
         }
         state_path = prefix + ".pt"
         other_path = prefix + ".ot"
         torch.save(other_params, other_path)
         torch.save(network_state, state_path)
-        print('model saved to {}'.format(prefix))
+        print("model saved to {}".format(prefix))

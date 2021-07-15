@@ -8,7 +8,9 @@ from mspan_roberta_gcn.mspan_roberta_gcn import NumericallyAugmentedBertNet
 from mspan_roberta_gcn.drop_roberta_dataset import DropReader
 from tag_mspan_robert_gcn.drop_roberta_mspan_dataset import DropReader as TDropReader
 from tag_mspan_robert_gcn.inference_batch_gen import DropBatchGen as TDropBatchGen
-from tag_mspan_robert_gcn.tag_mspan_roberta_gcn import NumericallyAugmentedBertNet as TNumericallyAugmentedBertNet
+from tag_mspan_robert_gcn.tag_mspan_roberta_gcn import (
+    NumericallyAugmentedBertNet as TNumericallyAugmentedBertNet,
+)
 from transformers import RobertaTokenizer, RobertaModel, RobertaConfig
 
 
@@ -26,30 +28,45 @@ print("Build bert model.")
 bert_model = RobertaModel(RobertaConfig().from_pretrained(args.roberta_model))
 print("Build Drop model.")
 if args.tag_mspan:
-    network = TNumericallyAugmentedBertNet(bert_model,
-                                          hidden_size=bert_model.config.hidden_size,
-                                          dropout_prob=0.0,
-                                          use_gcn=args.use_gcn,
-                                          gcn_steps=args.gcn_steps)
+    network = TNumericallyAugmentedBertNet(
+        bert_model,
+        hidden_size=bert_model.config.hidden_size,
+        dropout_prob=0.0,
+        use_gcn=args.use_gcn,
+        gcn_steps=args.gcn_steps,
+    )
 else:
-    network = NumericallyAugmentedBertNet(bert_model,
-                hidden_size=bert_model.config.hidden_size,
-                dropout_prob=0.0,
-                use_gcn=args.use_gcn,
-                gcn_steps=args.gcn_steps)
+    network = NumericallyAugmentedBertNet(
+        bert_model,
+        hidden_size=bert_model.config.hidden_size,
+        dropout_prob=0.0,
+        use_gcn=args.use_gcn,
+        gcn_steps=args.gcn_steps,
+    )
 
-if args.cuda: network.cuda()
+if args.cuda:
+    network.cuda()
 print("Load from pre path {}.".format(args.pre_path))
 network.load_state_dict(torch.load(args.pre_path))
 
 print("Load data from {}.".format(args.inf_path))
 tokenizer = RobertaTokenizer.from_pretrained(args.roberta_model)
 if args.tag_mspan:
-    inf_iter = TDropBatchGen(args, tokenizer,
-                            TDropReader(tokenizer, passage_length_limit=463, question_length_limit=46)._read(
-                                args.inf_path))
+    inf_iter = TDropBatchGen(
+        args,
+        tokenizer,
+        TDropReader(
+            tokenizer, passage_length_limit=463, question_length_limit=46
+        )._read(args.inf_path),
+    )
 else:
-    inf_iter = DropBatchGen(args, tokenizer, DropReader(tokenizer, passage_length_limit=463, question_length_limit=46)._read(args.inf_path))
+    inf_iter = DropBatchGen(
+        args,
+        tokenizer,
+        DropReader(tokenizer, passage_length_limit=463, question_length_limit=46)._read(
+            args.inf_path
+        ),
+    )
 
 print("Start inference...")
 result = {}
@@ -58,7 +75,9 @@ with torch.no_grad():
     for batch in tqdm(inf_iter):
         output_dict = network(**batch)
         for i in range(len(output_dict["question_id"])):
-            result[output_dict["question_id"][i]] =  output_dict["answer"][i]["predicted_answer"]
+            result[output_dict["question_id"][i]] = output_dict["answer"][i][
+                "predicted_answer"
+            ]
 
 with open(args.dump_path, "w", encoding="utf8") as f:
     json.dump(result, f)

@@ -10,7 +10,7 @@ from collections import defaultdict
 
 
 def get_number_from_word(word, improve_number_extraction=True):
-    punctuation = string.punctuation.replace('-', '')
+    punctuation = string.punctuation.replace("-", "")
     word = word.strip(punctuation)
     word = word.replace(",", "")
     try:
@@ -23,30 +23,30 @@ def get_number_from_word(word, improve_number_extraction=True):
                 number = float(word)
             except ValueError:
                 if improve_number_extraction:
-                    if re.match('^\d*1st$', word):  # ending in '1st'
+                    if re.match("^\d*1st$", word):  # ending in '1st'
                         number = int(word[:-2])
-                    elif re.match('^\d*2nd$', word):  # ending in '2nd'
+                    elif re.match("^\d*2nd$", word):  # ending in '2nd'
                         number = int(word[:-2])
-                    elif re.match('^\d*3rd$', word):  # ending in '3rd'
+                    elif re.match("^\d*3rd$", word):  # ending in '3rd'
                         number = int(word[:-2])
-                    elif re.match('^\d+th$', word):  # ending in <digits>th
+                    elif re.match("^\d+th$", word):  # ending in <digits>th
                         # Many occurrences are when referring to centuries (e.g "the *19th* century")
                         number = int(word[:-2])
-                    elif len(word) > 1 and word[-2] == '0' and re.match('^\d+s$', word):
+                    elif len(word) > 1 and word[-2] == "0" and re.match("^\d+s$", word):
                         # Decades, e.g. "1960s".
                         # Other sequences of digits ending with s (there are 39 of these in the training
                         # set), do not seem to be arithmetically related, as they are usually proper
                         # names, like model numbers.
                         number = int(word[:-1])
-                    elif len(word) > 4 and re.match('^\d+(\.?\d+)?/km[²2]$', word):
+                    elif len(word) > 4 and re.match("^\d+(\.?\d+)?/km[²2]$", word):
                         # per square kilometer, e.g "73/km²" or "3057.4/km2"
-                        if '.' in word:
+                        if "." in word:
                             number = float(word[:-4])
                         else:
                             number = int(word[:-4])
-                    elif len(word) > 6 and re.match('^\d+(\.?\d+)?/month$', word):
+                    elif len(word) > 6 and re.match("^\d+(\.?\d+)?/month$", word):
                         # per month, e.g "1050.95/month"
-                        if '.' in word:
+                        if "." in word:
                             number = float(word[:-6])
                         else:
                             number = int(word[:-6])
@@ -130,9 +130,11 @@ def clipped_passage_num(number_indices, number_len, numbers_in_passage, plen):
 def cached_path(file_path):
     return file_path
 
-IGNORED_TOKENS = {'a', 'an', 'the'}
-STRIPPED_CHARACTERS = string.punctuation + ''.join([u"‘", u"’", u"´", u"`", "_"])
-USTRIPPED_CHARACTERS = ''.join([u"Ġ"])
+
+IGNORED_TOKENS = {"a", "an", "the"}
+STRIPPED_CHARACTERS = string.punctuation + "".join(["‘", "’", "´", "`", "_"])
+USTRIPPED_CHARACTERS = "".join(["Ġ"])
+
 
 def whitespace_tokenize(text):
     """Runs basic whitespace cleaning and splitting on a piece of text."""
@@ -144,26 +146,58 @@ def whitespace_tokenize(text):
     tokens = [token.strip(STRIPPED_CHARACTERS) for token in tokens]
     return tokens
 
-WORD_NUMBER_MAP = {"zero": 0, "one": 1, "two": 2, "three": 3, "four": 4,
-                   "five": 5, "six": 6, "seven": 7, "eight": 8,
-                   "nine": 9, "ten": 10, "eleven": 11, "twelve": 12,
-                   "thirteen": 13, "fourteen": 14, "fifteen": 15,
-                   "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19}
+
+WORD_NUMBER_MAP = {
+    "zero": 0,
+    "one": 1,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+    "ten": 10,
+    "eleven": 11,
+    "twelve": 12,
+    "thirteen": 13,
+    "fourteen": 14,
+    "fifteen": 15,
+    "sixteen": 16,
+    "seventeen": 17,
+    "eighteen": 18,
+    "nineteen": 19,
+}
+
 
 class DropReader(object):
-    def __init__(self, tokenizer,
-                 passage_length_limit: int = None, question_length_limit: int = None,
-                 skip_when_all_empty: List[str] = None, instance_format: str = "drop",
-                 relaxed_span_match_for_finding_labels: bool = True) -> None:
+    def __init__(
+        self,
+        tokenizer,
+        passage_length_limit: int = None,
+        question_length_limit: int = None,
+        skip_when_all_empty: List[str] = None,
+        instance_format: str = "drop",
+        relaxed_span_match_for_finding_labels: bool = True,
+    ) -> None:
         self._tokenizer = tokenizer
         self.passage_length_limit = passage_length_limit
         self.question_length_limit = question_length_limit
-        self.skip_when_all_empty = skip_when_all_empty if skip_when_all_empty is not None else []
+        self.skip_when_all_empty = (
+            skip_when_all_empty if skip_when_all_empty is not None else []
+        )
         for item in self.skip_when_all_empty:
-            assert item in ["passage_span", "question_span", "addition_subtraction",
-                            "counting"], f"Unsupported skip type: {item}"
+            assert item in [
+                "passage_span",
+                "question_span",
+                "addition_subtraction",
+                "counting",
+            ], f"Unsupported skip type: {item}"
         self.instance_format = instance_format
-        self.relaxed_span_match_for_finding_labels = relaxed_span_match_for_finding_labels
+        self.relaxed_span_match_for_finding_labels = (
+            relaxed_span_match_for_finding_labels
+        )
 
     @staticmethod
     def convert_word_to_number(word: str, try_to_include_more_numbers=False):
@@ -172,7 +206,7 @@ class DropReader(object):
         """
         if try_to_include_more_numbers:
             # strip all punctuations from the sides of the word, except for the negative sign
-            punctruations = string.punctuation.replace('-', '')
+            punctruations = string.punctuation.replace("-", "")
             word = word.strip(punctruations)
             # some words may contain the comma as deliminator
             word = word.replace(",", "")
@@ -220,8 +254,13 @@ class DropReader(object):
                 if "validated_answers" in question_answer:
                     answer_annotations += question_answer["validated_answers"]
 
-                instance = self.text_to_instance(question_text, passage_text, question_id, passage_id,
-                                                 answer_annotations)
+                instance = self.text_to_instance(
+                    question_text,
+                    passage_text,
+                    question_id,
+                    passage_id,
+                    answer_annotations,
+                )
                 if instance is not None:
                     instances.append(instance)
                 else:
@@ -229,45 +268,78 @@ class DropReader(object):
         print(f"Skipped {skip_count} questions, kept {len(instances)} questions.")
         return instances
 
-    def text_to_instance(self,
-                         question_text: str, passage_text: str,
-                         question_id: str, passage_id: str,
-                         answer_annotations):
+    def text_to_instance(
+        self,
+        question_text: str,
+        passage_text: str,
+        question_id: str,
+        passage_id: str,
+        answer_annotations,
+    ):
         # pylint: disable=arguments-differ
 
         passage_text = " ".join(whitespace_tokenize(passage_text))
         question_text = " ".join(whitespace_tokenize(question_text))
 
-        passage_tokens, passage_offset, numbers_in_passage, number_indices, number_len = roberta_tokenize(passage_text, self._tokenizer)
-        question_tokens, question_offset, numbers_in_question, question_number_indices, question_number_len = roberta_tokenize(question_text, self._tokenizer)
+        (
+            passage_tokens,
+            passage_offset,
+            numbers_in_passage,
+            number_indices,
+            number_len,
+        ) = roberta_tokenize(passage_text, self._tokenizer)
+        (
+            question_tokens,
+            question_offset,
+            numbers_in_question,
+            question_number_indices,
+            question_number_len,
+        ) = roberta_tokenize(question_text, self._tokenizer)
         if self.passage_length_limit is not None:
             passage_tokens = passage_tokens[: self.passage_length_limit]
             if len(number_indices) > 0:
-                number_indices, number_len, numbers_in_passage = \
-                    clipped_passage_num(number_indices, number_len, numbers_in_passage, len(passage_tokens))
+                number_indices, number_len, numbers_in_passage = clipped_passage_num(
+                    number_indices, number_len, numbers_in_passage, len(passage_tokens)
+                )
 
         if self.question_length_limit is not None:
             question_tokens = question_tokens[: self.question_length_limit]
             if len(question_number_indices) > 0:
-                question_number_indices, question_number_len, numbers_in_question = \
-                    clipped_passage_num(question_number_indices, question_number_len, numbers_in_question, len(question_tokens))
+                (
+                    question_number_indices,
+                    question_number_len,
+                    numbers_in_question,
+                ) = clipped_passage_num(
+                    question_number_indices,
+                    question_number_len,
+                    numbers_in_question,
+                    len(question_tokens),
+                )
 
         answer_type: str = None
         answer_texts: List[str] = []
         if answer_annotations:
             # Currently we only use the first annotated answer here, but actually this doesn't affect
             # the training, because we only have one annotation for the train set.
-            answer_type, answer_texts = self.extract_answer_info_from_annotation(answer_annotations[0])
-            answer_texts = [" ".join(whitespace_tokenize(answer_text)) for answer_text in answer_texts]
+            answer_type, answer_texts = self.extract_answer_info_from_annotation(
+                answer_annotations[0]
+            )
+            answer_texts = [
+                " ".join(whitespace_tokenize(answer_text))
+                for answer_text in answer_texts
+            ]
 
         # Tokenize the answer text in order to find the matched span based on token
         tokenized_answer_texts = []
 
         for answer_text in answer_texts:
-            answer_tokens, _, _, _, _ = roberta_tokenize(answer_text, self._tokenizer, True)
-            tokenized_answer_texts.append(' '.join(token for token in answer_tokens))
+            answer_tokens, _, _, _, _ = roberta_tokenize(
+                answer_text, self._tokenizer, True
+            )
+            tokenized_answer_texts.append(" ".join(token for token in answer_tokens))
 
         if self.instance_format == "drop":
+
             def get_number_order(numbers):
                 if len(numbers) < 1:
                     return None
@@ -276,7 +348,11 @@ class DropReader(object):
                 rank = 0
                 number_rank = []
                 for i, idx in enumerate(ordered_idx_list):
-                    if i == 0 or numbers[ordered_idx_list[i]] != numbers[ordered_idx_list[i - 1]]:
+                    if (
+                        i == 0
+                        or numbers[ordered_idx_list[i]]
+                        != numbers[ordered_idx_list[i - 1]]
+                    ):
                         rank += 1
                     number_rank.append(rank)
 
@@ -294,8 +370,8 @@ class DropReader(object):
                 passage_number_order = []
                 question_number_order = []
             else:
-                passage_number_order = all_number_order[:len(numbers_in_passage)]
-                question_number_order = all_number_order[len(numbers_in_passage):]
+                passage_number_order = all_number_order[: len(numbers_in_passage)]
+                question_number_order = all_number_order[len(numbers_in_passage) :]
 
             number_indices = [indice + 1 for indice in number_indices]
             numbers_in_passage.append(100)
@@ -316,14 +392,19 @@ class DropReader(object):
 
             numbers_as_tokens = [str(number) for number in numbers_in_passage]
 
-            valid_passage_spans = self.find_valid_spans(passage_tokens,
-                                                        tokenized_answer_texts) if tokenized_answer_texts else []
+            valid_passage_spans = (
+                self.find_valid_spans(passage_tokens, tokenized_answer_texts)
+                if tokenized_answer_texts
+                else []
+            )
             if len(valid_passage_spans) > 0:
                 valid_question_spans = []
             else:
-                valid_question_spans = self.find_valid_spans(question_tokens,
-                                                         tokenized_answer_texts) if tokenized_answer_texts else []
-
+                valid_question_spans = (
+                    self.find_valid_spans(question_tokens, tokenized_answer_texts)
+                    if tokenized_answer_texts
+                    else []
+                )
 
             target_numbers = []
             # `answer_texts` is a list of valid answers.
@@ -335,47 +416,67 @@ class DropReader(object):
             valid_counts: List[int] = []
             if answer_type in ["number", "date"]:
                 target_number_strs = ["%.3f" % num for num in target_numbers]
-                valid_signs_for_add_sub_expressions = self.find_valid_add_sub_expressions(numbers_in_passage,
-                                                                                          target_number_strs)
+                valid_signs_for_add_sub_expressions = (
+                    self.find_valid_add_sub_expressions(
+                        numbers_in_passage, target_number_strs
+                    )
+                )
             if answer_type in ["number"]:
                 # Currently we only support count number 0 ~ 9
                 numbers_for_count = list(range(10))
                 valid_counts = self.find_valid_counts(numbers_for_count, target_numbers)
 
-            type_to_answer_map = {"passage_span": valid_passage_spans, "question_span": valid_question_spans,
-                                  "addition_subtraction": valid_signs_for_add_sub_expressions, "counting": valid_counts}
+            type_to_answer_map = {
+                "passage_span": valid_passage_spans,
+                "question_span": valid_question_spans,
+                "addition_subtraction": valid_signs_for_add_sub_expressions,
+                "counting": valid_counts,
+            }
 
             if self.skip_when_all_empty and not any(
-                type_to_answer_map[skip_type] for skip_type in self.skip_when_all_empty):
+                type_to_answer_map[skip_type] for skip_type in self.skip_when_all_empty
+            ):
                 return None
 
-            answer_info = {"answer_texts": answer_texts,  # this `answer_texts` will not be used for evaluation
-                           "answer_passage_spans": valid_passage_spans, "answer_question_spans": valid_question_spans,
-                           "signs_for_add_sub_expressions": valid_signs_for_add_sub_expressions, "counts": valid_counts}
+            answer_info = {
+                "answer_texts": answer_texts,  # this `answer_texts` will not be used for evaluation
+                "answer_passage_spans": valid_passage_spans,
+                "answer_question_spans": valid_question_spans,
+                "signs_for_add_sub_expressions": valid_signs_for_add_sub_expressions,
+                "counts": valid_counts,
+            }
 
-            return self.make_marginal_drop_instance(question_tokens,
-                                                    passage_tokens,
-                                                    numbers_as_tokens,
-                                                    number_indices,
-                                                    passage_number_order,
-                                                    question_number_order,
-                                                    question_number_indices,
-                                                    answer_info,
-                                                    additional_metadata={"original_passage": passage_text,
-                                                                         "passage_token_offsets": passage_offset,
-                                                                         "original_question": question_text,
-                                                                         "question_token_offsets": question_offset,
-                                                                         "original_numbers": numbers_in_passage,
-                                                                         "passage_id": passage_id,
-                                                                         "question_id": question_id,
-                                                                         "answer_info": answer_info,
-                                                                         "answer_annotations": answer_annotations})
+            return self.make_marginal_drop_instance(
+                question_tokens,
+                passage_tokens,
+                numbers_as_tokens,
+                number_indices,
+                passage_number_order,
+                question_number_order,
+                question_number_indices,
+                answer_info,
+                additional_metadata={
+                    "original_passage": passage_text,
+                    "passage_token_offsets": passage_offset,
+                    "original_question": question_text,
+                    "question_token_offsets": question_offset,
+                    "original_numbers": numbers_in_passage,
+                    "passage_id": passage_id,
+                    "question_id": question_id,
+                    "answer_info": answer_info,
+                    "answer_annotations": answer_annotations,
+                },
+            )
         else:
-            raise ValueError(f"Expect the instance format to be \"drop\", \"squad\" or \"bert\", "
-                             f"but got {self.instance_format}")
+            raise ValueError(
+                f'Expect the instance format to be "drop", "squad" or "bert", '
+                f"but got {self.instance_format}"
+            )
 
     @staticmethod
-    def extract_answer_info_from_annotation(answer_annotation: Dict[str, Any]) -> Tuple[str, List[str]]:
+    def extract_answer_info_from_annotation(
+        answer_annotation: Dict[str, Any]
+    ) -> Tuple[str, List[str]]:
         answer_type = None
         if answer_annotation["spans"]:
             answer_type = "spans"
@@ -384,7 +485,9 @@ class DropReader(object):
         elif any(answer_annotation["date"].values()):
             answer_type = "date"
 
-        answer_content = answer_annotation[answer_type] if answer_type is not None else None
+        answer_content = (
+            answer_annotation[answer_type] if answer_type is not None else None
+        )
 
         answer_texts: List[str] = []
         if answer_type is None:  # No answer
@@ -394,8 +497,11 @@ class DropReader(object):
             answer_texts = answer_content
         elif answer_type == "date":
             # answer_content is a dict with "month", "day", "year" as the keys
-            date_tokens = [answer_content[key] for key in ["month", "day", "year"] if
-                           key in answer_content and answer_content[key]]
+            date_tokens = [
+                answer_content[key]
+                for key in ["month", "day", "year"]
+                if key in answer_content and answer_content[key]
+            ]
             answer_texts = date_tokens
         elif answer_type == "number":
             # answer_content is a string of number
@@ -403,22 +509,30 @@ class DropReader(object):
         return answer_type, answer_texts
 
     @staticmethod
-    def find_valid_spans(passage_tokens: List[str], answer_texts: List[str]) -> List[Tuple[int, int]]:
-        normalized_tokens = [token.strip(USTRIPPED_CHARACTERS) for token in passage_tokens]
+    def find_valid_spans(
+        passage_tokens: List[str], answer_texts: List[str]
+    ) -> List[Tuple[int, int]]:
+        normalized_tokens = [
+            token.strip(USTRIPPED_CHARACTERS) for token in passage_tokens
+        ]
         # normalized_tokens = passage_tokens
         word_positions: Dict[str, List[int]] = defaultdict(list)
         for i, token in enumerate(normalized_tokens):
             word_positions[token].append(i)
         spans = []
         for answer_text in answer_texts:
-            answer_tokens = [token.strip(USTRIPPED_CHARACTERS) for token in answer_text.split()]
+            answer_tokens = [
+                token.strip(USTRIPPED_CHARACTERS) for token in answer_text.split()
+            ]
             num_answer_tokens = len(answer_tokens)
             if answer_tokens[0] not in word_positions:
                 continue
             for span_start in word_positions[answer_tokens[0]]:
                 span_end = span_start  # span_end is _inclusive_
                 answer_index = 1
-                while answer_index < num_answer_tokens and span_end + 1 < len(normalized_tokens):
+                while answer_index < num_answer_tokens and span_end + 1 < len(
+                    normalized_tokens
+                ):
                     token = normalized_tokens[span_end + 1]
                     if answer_tokens[answer_index] == token:
                         answer_index += 1
@@ -432,23 +546,34 @@ class DropReader(object):
         return spans
 
     @staticmethod
-    def find_valid_add_sub_expressions(numbers: List, targets: List, max_number_of_numbers_to_consider: int = 3) -> \
-    List[List[int]]:
+    def find_valid_add_sub_expressions(
+        numbers: List, targets: List, max_number_of_numbers_to_consider: int = 3
+    ) -> List[List[int]]:
         valid_signs_for_add_sub_expressions = []
         # TODO: Try smaller numbers?
-        for number_of_numbers_to_consider in range(2, max_number_of_numbers_to_consider + 1):
-            possible_signs = list(itertools.product((-1, 1), repeat=number_of_numbers_to_consider))
-            for number_combination in itertools.combinations(enumerate(numbers), number_of_numbers_to_consider):
+        for number_of_numbers_to_consider in range(
+            2, max_number_of_numbers_to_consider + 1
+        ):
+            possible_signs = list(
+                itertools.product((-1, 1), repeat=number_of_numbers_to_consider)
+            )
+            for number_combination in itertools.combinations(
+                enumerate(numbers), number_of_numbers_to_consider
+            ):
                 indices = [it[0] for it in number_combination]
                 values = [it[1] for it in number_combination]
                 for signs in possible_signs:
                     eval_value = sum(sign * value for sign, value in zip(signs, values))
                     # if eval_value in targets:
-                    eval_value_str = '%.3f' % eval_value
+                    eval_value_str = "%.3f" % eval_value
                     if eval_value_str in targets:
-                        labels_for_numbers = [0] * len(numbers)  # 0 represents ``not included''.
+                        labels_for_numbers = [0] * len(
+                            numbers
+                        )  # 0 represents ``not included''.
                         for index, sign in zip(indices, signs):
-                            labels_for_numbers[index] = 1 if sign == 1 else 2  # 1 for positive, 2 for negative
+                            labels_for_numbers[index] = (
+                                1 if sign == 1 else 2
+                            )  # 1 for positive, 2 for negative
                         valid_signs_for_add_sub_expressions.append(labels_for_numbers)
         return valid_signs_for_add_sub_expressions
 
@@ -461,29 +586,33 @@ class DropReader(object):
         return valid_indices
 
     @staticmethod
-    def make_marginal_drop_instance(question_tokens: List[str],
-                                    passage_tokens: List[str],
-                                    number_tokens: List[str],
-                                    number_indices: List[int],
-                                    passage_number_order: np.ndarray,
-                                    question_number_order: np.ndarray,
-                                    question_number_indices: List[int],
-                                    answer_info: Dict[str, Any] = None,
-                                    additional_metadata: Dict[str, Any] = None):
+    def make_marginal_drop_instance(
+        question_tokens: List[str],
+        passage_tokens: List[str],
+        number_tokens: List[str],
+        number_indices: List[int],
+        passage_number_order: np.ndarray,
+        question_number_order: np.ndarray,
+        question_number_indices: List[int],
+        answer_info: Dict[str, Any] = None,
+        additional_metadata: Dict[str, Any] = None,
+    ):
         metadata = {
-                    "question_tokens": [token for token in question_tokens],
-                    "passage_tokens": [token for token in passage_tokens],
-                    "number_tokens": [token for token in number_tokens],
-                    "number_indices": number_indices,
-                    "question_number_indices": question_number_indices,
-                    "passage_number_order": passage_number_order,
-                    "question_number_order": question_number_order,
-                    }
+            "question_tokens": [token for token in question_tokens],
+            "passage_tokens": [token for token in passage_tokens],
+            "number_tokens": [token for token in number_tokens],
+            "number_indices": number_indices,
+            "question_number_indices": question_number_indices,
+            "passage_number_order": passage_number_order,
+            "question_number_order": question_number_order,
+        }
         if answer_info:
             metadata["answer_texts"] = answer_info["answer_texts"]
             metadata["answer_passage_spans"] = answer_info["answer_passage_spans"]
             metadata["answer_question_spans"] = answer_info["answer_question_spans"]
-            metadata["signs_for_add_sub_expressions"] = answer_info["signs_for_add_sub_expressions"]
+            metadata["signs_for_add_sub_expressions"] = answer_info[
+                "signs_for_add_sub_expressions"
+            ]
             metadata["counts"] = answer_info["counts"]
 
         metadata.update(additional_metadata)
