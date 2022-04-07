@@ -1,7 +1,8 @@
 import os
 import pickle
 import argparse
-from transformers import RobertaTokenizer
+#from transformers import RobertaTokenizer
+from transformers import BertTokenizer
 from mspan_roberta_gcn.drop_roberta_dataset import DropReader
 from tag_mspan_robert_gcn.drop_roberta_mspan_dataset import DropReader as TDropReader
 
@@ -14,7 +15,7 @@ parser.add_argument("--tag_mspan", action="store_true")
 
 args = parser.parse_args()
 
-tokenizer = RobertaTokenizer.from_pretrained(args.input_path + "/roberta.large")
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
 
 if args.tag_mspan:
     dev_reader = TDropReader(
@@ -42,11 +43,11 @@ if args.tag_mspan:
         data = train_reader._read(dpath)
         print(
             "Save data to {}.".format(
-                os.path.join(args.output_dir, "tmspan_cached_roberta_{}.pkl".format(dm))
+                os.path.join(args.output_dir, "tmspan_cached_genbert_{}.pkl".format(dm))
             )
         )
         with open(
-            os.path.join(args.output_dir, "tmspan_cached_roberta_{}.pkl".format(dm)),
+            os.path.join(args.output_dir, "tmspan_cached_genbert_{}.pkl".format(dm)),
             "wb",
         ) as f:
             pickle.dump(data, f)
@@ -57,11 +58,11 @@ if args.tag_mspan:
         data = dev_reader._read(dpath) if dm == "dev" else train_reader._read(dpath)
         print(
             "Save data to {}.".format(
-                os.path.join(args.output_dir, "tmspan_cached_roberta_{}.pkl".format(dm))
+                os.path.join(args.output_dir, "tmspan_cached_genbert_{}.pkl".format(dm))
             )
         )
         with open(
-            os.path.join(args.output_dir, "tmspan_cached_roberta_{}.pkl".format(dm)),
+            os.path.join(args.output_dir, "tmspan_cached_genbert_{}.pkl".format(dm)),
             "wb",
         ) as f:
             pickle.dump(data, f)
@@ -89,11 +90,11 @@ else:
         data = train_reader._read(dpath)
         print(
             "Save data to {}.".format(
-                os.path.join(args.output_dir, "cached_roberta_{}.pkl".format(dm))
+                os.path.join(args.output_dir, "cached_genbert_{}.pkl".format(dm))
             )
         )
         with open(
-            os.path.join(args.output_dir, "cached_roberta_{}.pkl".format(dm)), "wb"
+            os.path.join(args.output_dir, "cached_genbert_{}.pkl".format(dm)), "wb"
         ) as f:
             pickle.dump(data, f)
 
@@ -103,10 +104,10 @@ else:
         data = dev_reader._read(dpath) if dm == "dev" else train_reader._read(dpath)
         print(
             "Save data to {}.".format(
-                os.path.join(args.output_dir, "cached_roberta_{}.pkl".format(dm))
+                os.path.join(args.output_dir, "cached_genbert_{}.pkl".format(dm))
             )
         )
         with open(
-            os.path.join(args.output_dir, "cached_roberta_{}.pkl".format(dm)), "wb"
+            os.path.join(args.output_dir, "cached_genbert_{}.pkl".format(dm)), "wb"
         ) as f:
             pickle.dump(data, f)

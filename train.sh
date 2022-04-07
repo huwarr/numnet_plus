@@ -18,21 +18,21 @@ CODE_DIR=${BASE_DIR}
 
 if [ ${TMSPAN} = tag_mspan ]; then
   echo "Use tag_mspan model..."
-  CACHED_TRAIN=${DATA_DIR}/tmspan_cached_roberta_train.pkl
-  CACHED_DEV=${DATA_DIR}/tmspan_cached_roberta_dev.pkl
+  CACHED_TRAIN=${DATA_DIR}/tmspan_cached_genbert_train.pkl
+  CACHED_DEV=${DATA_DIR}/tmspan_cached_genbert_dev.pkl
   MODEL_CONFIG="--gcn_steps 3 --use_gcn --tag_mspan"
   if [ \( ! -e "${CACHED_TRAIN}" \)  -o \( ! -e "${CACHED_DEV}" \) ]; then
   echo "Preparing cached data."
-  python prepare_roberta_data.py --input_path ${DATA_DIR} --output_dir ${DATA_DIR} --tag_mspan
+  python3 prepare_genbert_data.py --input_path ${DATA_DIR} --output_dir ${DATA_DIR} --tag_mspan
   fi
 else
   echo "Use mspan model..."
-  CACHED_TRAIN=${DATA_DIR}/cached_roberta_train.pkl
-  CACHED_DEV=${DATA_DIR}/cached_roberta_dev.pkl
+  CACHED_TRAIN=${DATA_DIR}/cached_genbert_train.pkl
+  CACHED_DEV=${DATA_DIR}/cached_genbert_dev.pkl
   MODEL_CONFIG="--gcn_steps 3 --use_gcn"
   if [ \( ! -e "${CACHED_TRAIN}" \)  -o \( ! -e "${CACHED_DEV}" \) ]; then
   echo "Preparing cached data."
-  python prepare_roberta_data.py --input_path ${DATA_DIR} --output_dir ${DATA_DIR}
+  python3 prepare_genbert_data.py --input_path ${DATA_DIR} --output_dir ${DATA_DIR}
   fi
 fi
 
@@ -42,11 +42,11 @@ DATA_CONFIG="--data_dir ${DATA_DIR} --save_dir ${SAVE_DIR}"
 TRAIN_CONFIG="--batch_size 16 --eval_batch_size 5 --max_epoch 10 --warmup 0.06 --optimizer adam \
               --learning_rate ${LR} --weight_decay ${WD} --seed ${SEED} --gradient_accumulation_steps 4 \
               --bert_learning_rate ${BLR} --bert_weight_decay ${BWD} --log_per_updates 100 --eps 1e-6"
-BERT_CONFIG="--roberta_model ${DATA_DIR}/roberta.large"
+BERT_CONFIG="--encoder ${DATA_DIR}/genbert"
 
 
 echo "Start training..."
-python ${CODE_DIR}/roberta_gcn_cli.py \
+python ${CODE_DIR}/genbert_gcn_cli.py \
     ${DATA_CONFIG} \
     ${TRAIN_CONFIG} \
     ${BERT_CONFIG} \

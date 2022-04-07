@@ -11,7 +11,10 @@ from tag_mspan_robert_gcn.inference_batch_gen import DropBatchGen as TDropBatchG
 from tag_mspan_robert_gcn.tag_mspan_roberta_gcn import (
     NumericallyAugmentedBertNet as TNumericallyAugmentedBertNet,
 )
-from transformers import RobertaTokenizer, RobertaModel, RobertaConfig
+#from transformers import RobertaTokenizer, RobertaModel, RobertaConfig
+from transformers import BertTokenizer
+# GenBERT
+from modeling import BertTransformer
 
 
 parser = argparse.ArgumentParser("Bert inference task.")
@@ -25,7 +28,7 @@ args.cuda = torch.cuda.device_count() > 0
 
 
 print("Build bert model.")
-bert_model = RobertaModel(RobertaConfig().from_pretrained(args.roberta_model))
+bert_model = BertTransformer.from_pretrained(args.encoder).bert
 print("Build Drop model.")
 if args.tag_mspan:
     network = TNumericallyAugmentedBertNet(
@@ -50,7 +53,8 @@ print("Load from pre path {}.".format(args.pre_path))
 network.load_state_dict(torch.load(args.pre_path))
 
 print("Load data from {}.".format(args.inf_path))
-tokenizer = RobertaTokenizer.from_pretrained(args.roberta_model)
+# For GanBERT
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
 if args.tag_mspan:
     inf_iter = TDropBatchGen(
         args,
