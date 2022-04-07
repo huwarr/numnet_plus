@@ -46,7 +46,7 @@ BERT_CONFIG="--encoder ${DATA_DIR}/genbert"
 
 
 echo "Start training..."
-python ${CODE_DIR}/genbert_gcn_cli.py \
+python3 ${CODE_DIR}/genbert_gcn_cli.py \
     ${DATA_CONFIG} \
     ${TRAIN_CONFIG} \
     ${BERT_CONFIG} \
@@ -56,12 +56,12 @@ echo "Starting evaluation..."
 TEST_CONFIG="--eval_batch_size 5 --pre_path ${SAVE_DIR}/checkpoint_best.pt --data_mode dev --dump_path ${SAVE_DIR}/dev.json \
              --inf_path ${DATA_DIR}/drop_dataset_dev.json"
 
-python ${CODE_DIR}/roberta_predict.py \
+python3 ${CODE_DIR}/roberta_predict.py \
     ${DATA_CONFIG} \
     ${TEST_CONFIG} \
     ${BERT_CONFIG} \
     ${MODEL_CONFIG}
 
-python ${CODE_DIR}/drop_eval.py \
+python3 ${CODE_DIR}/drop_eval.py \
     --gold_path ${DATA_DIR}/drop_dataset_dev.json \
     --prediction_path ${SAVE_DIR}/dev.json
