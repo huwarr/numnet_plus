@@ -61,7 +61,7 @@ def main():
     logger.info("Num update steps {}!".format(num_train_steps))
 
     logger.info("Build bert model.")
-    bert_model = BertTransformer.from_pretrained.from_pretrained(args.encoder).bert
+    bert_model = BertTransformer.from_pretrained(args.encoder).bert
 
     logger.info("Build Drop model.")
     if not args.tag_mspan:
