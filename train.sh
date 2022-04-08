@@ -46,7 +46,7 @@ BERT_CONFIG="--encoder ${DATA_DIR}/genbert"
 
 
 echo "Start training..."
-python3 ${CODE_DIR}/genbert_gcn_cli.py \
+python3 ${CODE_DIR}/roberta_gcn_cli.py \
     ${DATA_CONFIG} \
     ${TRAIN_CONFIG} \
     ${BERT_CONFIG} \
