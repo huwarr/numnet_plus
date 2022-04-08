@@ -5,3 +5,4 @@ pytorch-pretrained-bert==0.6.2
 pytorch-transformers==1.1.0
 jsonlines
 ujson
+overrides==3.1.0
