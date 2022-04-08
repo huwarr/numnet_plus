@@ -223,10 +223,10 @@ class NumericallyAugmentedBertNet(nn.Module):
     ) -> Dict[str, torch.Tensor]:
 
         outputs = self.bert(
-            input_ids, attention_mask=input_mask, token_type_ids=input_segments
+            input_ids, attention_mask=input_mask, token_type_ids=input_segments, output_all_encoded_layers=True
         )
-        sequence_output = outputs[0]
-        sequence_output_list = [item for item in outputs[2][-4:]]
+        sequence_output = outputs[0][-1] # last hidden state
+        sequence_output_list = [item for item in outputs[0][-4:]] # last 4 hidden states
 
         batch_size = input_ids.size(0)
         if (
