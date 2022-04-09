@@ -12,8 +12,13 @@ PRETRAIN_PATH=$5
 
 BERT_CONFIG="--encoder ${PRETRAIN_PATH}"
 
-echo "Use tag_mspan model..."
-MODEL_CONFIG="--gcn_steps 3 --use_gcn --tag_mspan"
+if [ ${TMSPAN} = tag_mspan ]; then
+    echo "Use tag_mspan model..."
+    MODEL_CONFIG="--gcn_steps 3 --use_gcn --tag_mspan"
+else
+    echo "Use mspan model..."
+    MODEL_CONFIG="--gcn_steps 3 --use_gcn"
+fi
 
 echo "Starting evaluation..."
 TEST_CONFIG="--eval_batch_size 32 --pre_path ${PRE_PATH} --data_mode dev --dump_path ${DUMP_PATH} \
