@@ -6,9 +6,9 @@ set -xe
 
 SEED=$1
 LR=$2
-BLR=$3
+BLR=$3 # 1.5e-5 -> 3e-5
 WD=$4
-BWD=$5
+BWD=$5 # 0.01 -> 0 (?), warmup 0.06 -> 0.1, max_epoch 10 -> 30 (?)
 TMSPAN=$6
 DATA_DIR=$7
 
@@ -57,7 +57,6 @@ TEST_CONFIG="--eval_batch_size 5 --pre_path ${SAVE_DIR}/checkpoint_best.pt --dat
              --inf_path ${DATA_DIR}/drop_dataset_dev.json"
 
 python3 ${CODE_DIR}/roberta_predict.py \
-    ${DATA_CONFIG} \
     ${TEST_CONFIG} \
     ${BERT_CONFIG} \
     ${MODEL_CONFIG}
