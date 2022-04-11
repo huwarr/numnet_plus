@@ -86,13 +86,17 @@ def main():
 
     train_start = datetime.now()
     first = True
-
+    loss_prev = float('inf')
+    loss_curr = float('inf')
     for epoch in range(1, args.max_epoch + 1):
         model.avg_reset()
         if not first:
             train_itr.reset()
         first = False
         logger.info("At epoch {}".format(epoch))
+        loss_prev = loss_curr
+        loss_curr = 0.
+        count = 0
         for step, batch in enumerate(train_itr):
             model.update(batch)
             if (
@@ -113,7 +117,10 @@ def main():
                         ).split(".")[0],
                     )
                 )
+                loss_curr += model.train_loss.sum
+                count += model.train_loss.count
                 model.avg_reset()
+        loss_curr /= count
         total_num, eval_loss, eval_em, eval_f1 = model.evaluate(dev_itr)
         logger.info(
             "Eval {} examples, result in epoch {}, eval loss {}, eval em {} eval f1 {}.".format(
@@ -126,6 +133,11 @@ def main():
             model.save(save_prefix, epoch)
             best_result = eval_f1
             logger.info("Best eval F1 {} at epoch {}".format(best_result, epoch))
+            
+        # Stopping criteria
+        if abs(loss_curr - loss_prev) < args.eps:
+            logger.info("Optimization has converged, at epoch {}".format(epoch))
+            break
 
     logger.info(
         "done training in {} seconds!".format((datetime.now() - train_start).seconds)
