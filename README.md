@@ -1,5 +1,11 @@
 # NumNet+
 
+In this fork we implemented BERT, initialized with GenBERT's weights, as NumNet+'s encoder.
+
+GenBERT: [[CODE]](https://github.com/huwarr/injecting_numeracy), [[PDF]](https://arxiv.org/pdf/2004.04487.pdf)
+
+---
+
 This is the official code repository for NumNet+ (https://leaderboard.allenai.org/drop/submission/bm60vq8f7g2p7t2ld0j0) and NumNet+ v2 (https://leaderboard.allenai.org/drop/submission/bmfuq9e0v32fq8pskug0).
 NumNet (https://github.com/ranqiu92/NumNet) was used as a basis for our work.
 
