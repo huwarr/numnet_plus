@@ -1,8 +1,8 @@
-# NumNet+
+# NumNet+, initialized with GenBERT's weights
 
 In this fork we implemented BERT, initialized with GenBERT's weights, as NumNet+'s encoder.
 
-GenBERT: [[CODE]](https://github.com/huwarr/injecting_numeracy), [[PDF]](https://arxiv.org/pdf/2004.04487.pdf)
+GenBERT: [[CODE]](https://github.com/ag1988/injecting_numeracy), [[PDF]](https://arxiv.org/pdf/2004.04487.pdf)
 
 ---
 
