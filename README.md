@@ -38,7 +38,7 @@ GenBERT: [[CODE]](https://github.com/huwarr/injecting_numeracy), [[PDF]](https:/
     `sh train.sh 345 5e-4 1.5e-5 5e-5 0.01 tag_mspan`
 
 ### Eval
-- Assuming, the model as saved as `SAVE_PATH/model.pt`.
+- Assuming, the model is saved as `SAVE_PATH/model.pt`.
     
     - Simple multi-span extraction (NumNet+).
     
